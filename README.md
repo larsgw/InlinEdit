@@ -24,7 +24,7 @@ Small plugin for making a "markdown" editor. Uses the format described below. Us
 
 ```
 Table|table
------|-----
+---
 table|table
 ```
 
