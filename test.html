@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <title>Test</title>
+    <link href="inlinedit.css" rel="stylesheet" type="text/css" >
+  </head>
+  <body>
+    
+    <div><!--
+--># Header 1
+
+tesrt tests tests
+
+a|a
+---
+a|a
+
+## Header 2
+
+* 1
+* 2
+* 3
+* 4
+
+**Bold**<!--
+    --></div>
+    
+    <hr style="margin:2em 0;">
+    
+    <div>AaBb CcDd [(c)EeFf GgHh](c:#450000)[(c) IiJj ](c:#ff0000)[(c)AaBb CcDd](c:#664646) EeFf GgHh IiJj</div>
+    
+    <p>Test: "AaBb CcDd [c:EeFf GgHh](c:#450000)[c: IiJj ](c:#ff0000)[c:AaBb CcDd](c:#664646) EeFf GgHh IiJj"</p>
+    
+    <hr style="margin:2em 0;">
+    
+    <div>AaBb CcDd EeFf GgHh IiJj KkLl MmNn OoPp QqRr SsTt</div>
+  
+    <script type="text/javascript" src="/~larsw/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="inlinedit.js"></script>
+    <script type="text/javascript">
+      $(window).on('load',function(){
+	$('div').edit(function(){});
+      });
+    </script>
+  </body>
+</html>
