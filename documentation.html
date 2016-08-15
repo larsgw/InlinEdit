@@ -1,0 +1,75 @@
+<!DOCTYPE HMTL>
+<html>
+  <head>
+    <title>Documentation of features of InlinEdit</title>
+    <style>
+      :root { font-family: sans-serif; }
+      pre,code { background:#eee;padding:2px 5px; }
+      pre code { background:transparent;padding:0; }
+      li pre   { display:inline-block;vertical-align:top;margin:0; }
+      li       { margin-bottom:5px; }
+      section { margin-left:3rem; }
+      section h2 { margin-left:-2rem; }
+      /* Documentation header counter CSS */
+      body { counter-reset:h2 h3 h4 h5 h6; }
+      h2 { counter-increment:h2;counter-reset:h3 h4 h5 h6; }
+      h3 { counter-increment:h3;counter-reset:   h4 h5 h6; }
+      h4 { counter-increment:h4;counter-reset:      h5 h6; }
+      h5 { counter-increment:h5;counter-reset:         h6; }
+      h6 { counter-increment:h6;counter-reset:           ; }
+      h2:before { content:counter(h2) '.' ' '; }
+      h3:before { content:counter(h2) '.' counter(h3) '.' ' '; }
+      h4:before { content:counter(h2) '.' counter(h3) '.' counter(h4) '.' ' '; }
+      h5:before { content:counter(h2) '.' counter(h3) '.' counter(h4) '.' counter(h5) '.' ' '; }
+      h6:before { content:counter(h2) '.' counter(h3) '.' counter(h4) '.' counter(h5) '.' counter(h6) '.' ' '; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <article>
+	<h1>Documentation of features of InlinEdit</h1>
+	<section id="plugin">
+	  <h2>Plugin use</h2>
+	    <p>The plugin is to be used as below:</p>
+	    <pre><code>$jQuery_Element.inlinedit(&lt;param 1&gt;)</code></pre>
+	    <h3>Parameters</h3>
+	    <ol>
+	      <li><code>f [function, required]</code>: Function to be executed on input</li>
+	    </ol>
+	</section>
+	<section id="format">
+	  <h2>Format</h2>
+	    <h3>File format</h3>
+	      <p>Mime type: text/plain</p>
+	    <h3>Syntax</h3>
+	      <p>To store rich text in InlinEdit the following syntax is used:</p>
+	      <ul>
+		<li><code>*Italics*</code></li>
+		<li><code>**Bold**</code></li>
+		<li><code>__Underline__</code></li>
+		<li><code>--Strikethrough--</code> (Single hyphen should be able to be used without trouble)</li>
+		<li><code>`code`</code></li>
+		<li><code>_Subscript_</code></li>
+		<li><code>^Superscript^</code></li>
+		<li><code>[Link](&lt;url&gt;)</code></li>
+		<li><code>[(c)Colored text](c:&lt;color&gt;)</code></li>
+		<li><code>[(b)Text with background](b:&lt;color&gt;)</code></li>
+		<li><code>[(s)Text with font size](s:&lt;px&gt;)</code></li>
+		<li><code>[(f)Text with font](f:&lt;font&gt;)</code></li>
+		<li><code>* Unordered list item</code></li>
+		<li><code>&lt;any digit&gt;. Ordered list item</code></li>
+		<li><pre><code>cell 1a|cell 1b
+---
+cell 2a|cell 2b</code></pre> (This is a table)</li>
+		<li><code># Header level 1</code></li>
+		<li><code>## Header level 2</code></li>
+	      </ul>
+	    <h3>Notes</h3>
+	      <ul>
+		<li>Escaping characters is not yet possible, but will be worked on</li>
+	      </ul>
+	</section>
+      </article>
+    </main>
+  </body>
+</html>
