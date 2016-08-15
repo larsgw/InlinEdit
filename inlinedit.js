@@ -14,10 +14,10 @@ function parseRichText(a) {
   .replace(/\[\(f\)(?!<\/)([^]+?)\]\(f:(.+?)\)(?!<\/)/g, '<span>[(f)</span><span style="     font-family:$2">$1</span><span>](f:$2)</span>')
   .replace(/\[(?!<\/)([^]+?)\]\((?![cbsf]:)(.+?)\)(?!<\/)/g, '<span>[</span><a href="$2">$1</a><span>]($2)</span>')
   // Lists
-  .replace(/((?:\n|^)(?!(?:  )*\*).*\n)(?=\* .*(?:\n|$))/g      ,'$1<ul>' )  
+  .replace(/((?:\n|^)(?!(?:  )*\*).*\n)(?=\* .*(?:\n|$))/g      ,'$1<ul>' )
   .replace(/((?:\n|^)(?!(?:  )*\d\.).*\n)(?=\d\. .*(?:\n|$))/g  ,'$1<ol>' )
-  .replace(/((?:\n|^)(?:  )*\* .*?(?:\n|$))(?!(?:  )*\* )/g     ,'$1</ul>')
-  .replace(/((?:\n|^)(?:  )*\d\. .*?(?:\n|$))(?!(?:  )*\d\. )/g ,'$1</ol>')
+  .replace(/((?:\n|<[uo]l>|^)(?:  )*\* .*?(?:\n|$))(?!(?:  )*\* )/g     ,'$1</ul>')
+  .replace(/((?:\n|<[uo]l>|^)(?:  )*\d\. .*?(?:\n|$))(?!(?:  )*\d\. )/g ,'$1</ol>')
   .replace(/(\n|<[uo]l>|^)((?:  )*(?:\*|\d\.) )(.*?)(?=\n<\/[uo]l>|\n(?:  )*(?:\*|\d\.) |$)/g,'$1<li><span>$2</span>$3</li>')
   // Tables
   .replace(/(\n\n|^)(?!.*\n\n)[^|]*(\|[^|]*)+(\n---+[^|]*(\|[^|]*?)+)+(?=\n\n|$)/g,function(m,a){
@@ -107,20 +107,83 @@ String.prototype.oddOccurence = function(a) {
   return mhl==0?0:Boolean(mhl%2);
 };
 
-jQuery.fn.getPreText   = function(){return this.contents().filter(function(){return this.nodeType==3;}).text()};
+var _InlinEdit={};
+//jQuery.fn.getPreText   = function(){return this.contents().filter(function(){return this.nodeType==3;}).text()};
 jQuery.fn.updateColour = function(){$(this).parent().css('color',$(this).val())};      
 jQuery.fn.markdown     = function () {
-  var s = '';
-  $.each($.parseHTML(this.text()),function(i,v){if(v.nodeType==3)s+=v.textContent});
-  this.html(parseRichText(s));
+  
+  this.html(
+    parseRichText(
+      $.parseHTML(
+	
+	this
+	  .html()
+	  .replace('<br>','\n')
+	  
+      )
+	.map(function(v){
+	
+	       if (v.nodeType === 3)
+	    return v.textContent;
+	  else if (v.nodeType === 1)
+	    return v.innerText;
+	  else
+	    return '';
+	
+      })
+	.join('')
+    )
+  );
+  
 };
 
-jQuery.fn.edit = function (f,o) {
+jQuery.fn.inlinedit = function (f,o) {
   $(this).addClass('T-e').each(function(){
     var elm = $(this),
-	txt = elm.wrapInner('<div class="T-et '+((o||{}).m===false?'S-hm':'')+'" contenteditable="true"></div>').children('.T-et')/*.blur(f)*/;
+	txt = elm.wrapInner('<div class="T-et '+((o||{}).m===false?'S-hm':'')+'" contenteditable="true"></div>').children('.T-et'),
+	timeout;
     
-    elm.append(
+    txt.keypress(function(e) {
+      if (e.which != 13) return true;
+      
+      var self        = this,
+	  docFragment = document.createDocumentFragment();
+
+      //add a new line
+      var newEle = document.createTextNode('\n');
+      docFragment.appendChild(newEle);
+      
+      if((function(){
+	var range = window.getSelection().getRangeAt(0),
+	    post_range = document.createRange();
+	    post_range.selectNodeContents(self);
+	    post_range.setStart(range.endContainer, range.endOffset);
+	
+	return post_range.cloneContents().textContent.length === 0;
+	
+      })()) docFragment.appendChild(newEle.cloneNode(true));
+
+      //make the br replace selection
+      var range = window.getSelection().getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(docFragment);
+
+      //create a new range
+      range = document.createRange();
+      range.setStartAfter(newEle);
+      range.collapse(true);
+
+      //make the cursor there
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      
+      txt.trigger('input');
+
+      return false;
+    });
+    
+    elm.append('<div class="T-ec">'+
       '<div class="T-es">'+
 	'<div>'+
 	  '<svg version="1.1" viewBox="0 0 16 16" width="24" height="24"><path d="M14.85 3H1.15C.52 3 0 3.52 0 4.15v7.69C0 12.48.52 13 1.15 13h13.69c.64 0 1.15-.52 1.15-1.15v-7.7C16 3.52 15.48 3 14.85 3zM9 11H7V8L5.5 9.92 4 8v3H2V5h2l1.5 2L7 5h2v6zm2.99.5L9.5 8H11V5h2v3h1.5l-2.51 3.5z"></path></svg>'+
@@ -179,8 +242,8 @@ jQuery.fn.edit = function (f,o) {
 	'<button class="B-es-ul C-i B-es-ns">format_list_bulleted</button>'+
 	'<button class="B-es-ol C-i B-es-ns">format_list_numbered</button>'+
 	'<button class="B-es-h2 C-i B-es-ns">title</button>'+
-      '</div>'
-    );
+      '</div>'+
+    '</div>');
     
     var ehf = function(e){
       e.preventDefault();
@@ -326,6 +389,22 @@ jQuery.fn.edit = function (f,o) {
     elm.find('button').filter('.B-es-ns').click(ehn).click(f);
     elm.find('.B-es-a').change(function(){elm.find('.T-et').toggleClass('S-hm')});
     elm.find('button.B-es-dc,button.B-es-db').find('input').change(function(){$(this).updateColour()});
-    elm.find('.T-et').on('input',f);
+    elm.find('.T-et').on('input',f).on('focus',function(){
+      elm.addClass('S-stec');
+    });
   });
+  
+  if(!_InlinEdit.document_click){
+    _InlinEdit.document_click=true;
+    
+    $(document).click(function (e) {
+      $('.T-e').each(function(){
+	var elm = $(this);
+	
+	if( (!elm.is(e.target)&&elm.has(e.target).length===0) )
+	  elm.removeClass('S-stec');
+	  
+      });
+    });
+  }
 };
