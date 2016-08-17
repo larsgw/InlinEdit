@@ -4,14 +4,18 @@ Small plugin for making a "markdown" editor. Uses the format described below. Us
 
 # Format documentation
 
-See [documentation](documentation.html#format).
+See [documentation](https://larsgw.github.io/InlinEdit/documentation.html#format).
 
 # Use
 
-See [documentation](documentation.html#plugin).
+See [documentation](https://larsgw.github.io/InlinEdit/documentation.html#plugin).
 
 # Dependencies
 
 * jQuery
 * Google's Material Icons font
 * Google's Roboto font
+
+# Demo
+
+[Demo](https://larsgw.github.io/InlinEdit/test.html)
