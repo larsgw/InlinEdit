@@ -1,0 +1,55 @@
+<html>
+  <head>
+    <title>Test</title>
+  </head>
+  <body>
+    
+    <p class="elm">This is a test</p>
+    
+    <button>Click!</button>
+    
+    <p><b>Log:</b> (every version is undoable)</p>
+    
+    <pre id="log"></pre>
+    
+    <p>The code above produces this page.</p>
+    
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="src/InlinEdit_0.2.js"></script>
+    <script type="text/javascript">
+
+var elm,n
+
+$(window).on('load',function(){
+
+  elm = $('.elm')
+  n = new InlinEditString('This is a test')
+  
+  $('button').click(e=>{
+    elm.html(
+      
+      // Interesting part
+      n
+	.bold(1,7)
+	.italic(4,10)
+	.calculateStyle()
+	.toHTML(true)
+    )
+    
+    $(log).html(
+      n._log.slice().map(v=>{
+	return (
+	  '<p style="border-bottom:1px solid rgba(0,0,0,.12)">' +
+	    'Version: ' + v.version + '\n' +
+	    'Change: '  + v.name    + '\n' +
+	    'Arguments:\n\n' + JSON.stringify(v.arguments,null,2) +
+	  '\n\n</p>'
+	)
+      }).join('\n')
+    )
+  })
+});
+
+    </script>
+  </body>
+</html>

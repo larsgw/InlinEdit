@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: InlinEdit_0.2.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: InlinEdit_0.2.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @author Lars Willighagen [lars.willighagen@gmail.com]
+ * @version 0.2
+ * @license
+ * Copyright (c) 2016 Lars Willighagen
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
+ * @class InlinEditString
+ * 
+ * InlinEditString
+ * 
+ * @param {String} string - String
+ * @param {(Object[]|String)} style - String style to apply
+ */
+
+function InlinEditString ( string, style ) {
+  
+  if ( ! ( this instanceof InlinEditString ) )
+    return new InlinEditString ( string, style )
+  
+  /**
+   * The log, containing all logged data.
+   * 
+   * These are the names of each called function, together with it's input. If the `InlinEditString` is changed, the version number gets updated as well.
+   * 
+   * The `.reset()` function **does not** have any influence on the log. This way, you can still undo all changes.
+   * 
+   * &lt;br />&lt;br />
+   * `.currentVersion()` and similar function **are not** logged, because this would be influenced by function using other functions.
+   *
+   * @type Object[]
+   * @property {Object} 0 - The first version, indicated with version 0, containing the object as it was when it was made. The following properties are used for the following properties too.
+   * @property {String} 0.name - The name of the called function. In case of the initial version, this is `"init"`.
+   * @property {String} 0.version - The version of the object. Undefined when a function that doesn't change the object is called.
+   * @property {Array} 0.arguments - The arguments passed in the called function.
+   */
+  this._log = [
+    {
+      name: 'init',
+      version: '0',
+      arguments: [ this._input.data, this._options ]
+    }
+  ]
+  
+  /**
+   * 
+   * @method currentVersion
+   * @memberof InlinEditString
+   * @this InlinEditString
+   * 
+   * @return The latest version of the object
+   */
+  this.currentVersion = function () {
+    var version = 0;
+    
+    for ( var i = 0; i &lt; this._log.length; i++ ) {
+      if ( this._log[ i ].version > version )
+	version = this._log[ i ].version }
+    
+    return version;
+  }
+  
+  /**
+   * Does not change the current object.
+   * 
+   * @method retrieveVersion
+   * @memberof InlinEditString
+   * @this InlinEditString
+   * 
+   * @param {Integer} The number of the version you want to retrieve. Illegel numbers: numbers under zero, floats, numbers above the current version of the object.
+   * @return The version of the object with the version number passed. `undefined` if an illegal number is passed.
+   */
+  this.retrieveVersion = function ( versnum ) {
+    this._log.push( {
+      name: 'retrieveVersion',
+      arguments: [ versnum ]
+    } )
+    
+    if ( versnum >= 0 &amp;&amp; versnum &lt;= this.currentVersion() ) {
+      var object = new InlinEditString( this._log[ 0 ].arguments[ 0 ], this._log[ 0 ].arguments[ 1 ] ),
+	  arr    = [];
+      
+      for ( var i = 0; i &lt; this._log.length; i++ ) {
+	if ( this._log[ i ].version )
+	  arr.push( this._log[ i ] ) }
+      
+      for ( var k = 1; k &lt;= versnum; k++ ) {
+	object[ arr[ k ].name ].apply( object, ( arr[ k ].arguments || [] ) ) }
+      
+      return object;
+      
+    } else return undefined;
+  }
+  
+  /**
+   * Does not change the current object. Undoes the last edit made.
+   * 
+   * @method undo
+   * @memberof InlinEditString
+   * @this InlinEditString
+   * 
+   * @return The last version of the object. `undefined` if used on first version.
+   */
+  this.undo = function () {
+    return this.retrieveVersion( this.currentVersion() - 1 );
+  }
+  
+  /**
+   * Reset a `InlinEditString` object.
+   * 
+   * @method reset
+   * @memberof InlinEditString
+   * @this InlinEditString
+   * @return The updated, empty parent object (except the log, the log lives)
+   */
+  this.reset = function () {
+    this._log.push( {
+      name: 'reset',
+      version: this.currentVersion() + 1,
+      arguments: []
+    } )
+    
+    this.data = [],
+    this._options = {};
+    return this;
+  }
+  
+  /*-------------------------------------------*/
+  
+  /**
+   * Get the plain text value of the styled string
+   *
+   * @method toString
+   * @memberof InlinEditString
+   * @this InlinEditString
+   * 
+   * @return The plain text string
+   */
+  this.toString = function () {
+    return this.string.map( function ( v ) {
+      return v.char
+    } ).join( '' )
+  }
+  
+  /**
+   * Get the html value of the styled string
+   *
+   * @method toString
+   * @memberof InlinEditString
+   * @this InlinEditString
+   * 
+   * @param {Boolean} [string=false] - HTML as string instead of a DOM object
+   * @return 
+   */
+  this.toHTML = function ( string ) {
+    
+    0    
+    
+  }
+  
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="InlinEditString.html">InlinEditString</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Sep 16 2016 17:47:50 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
